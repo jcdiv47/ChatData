@@ -1,0 +1,14 @@
+openai
+gradio
+chromadb
+tiktoken
+pymysql
+sqlalchemy
+pydantic
+tenacity
+mdtex2html
+tqdm
+colorama
+Pygments
+markdown
+markdown2
