@@ -81,7 +81,7 @@ def build_demo():
         gr.Markdown(
             """
             <p align="center">
-                <img src="https://raw.githubusercontent.com/jcdiv47/ChatData/master/serve/assets/scishang-logo.png">
+                <img src="https://raw.githubusercontent.com/jcdiv47/ChatData/master/serve/assets/scishang-logo.png" height=500 width=300>
             </p>
             """)
         history = gr.State([])

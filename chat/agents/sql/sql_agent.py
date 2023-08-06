@@ -6,11 +6,16 @@ from openai import ChatCompletion
 from pydantic import BaseModel
 from chat.vector_store import Chroma
 from chat.agents.sql.prompt import SQL_AGENT_FUNCTIONS, TOKENIZE_WARMUP_MESSAGES
-from chat.common.config import DB_URI
 from chat.common.log import logger
 from chat.model.openai import ChatModel
 from chat.agents.base import Agent
 from chat.agents.chat import ChatAgent
+from chat.common.helper_functions import coalesce
+try:
+    from chat.common.config import DB_URI
+    IS_DB_CONN_SET_UP = True
+except ImportError:
+    IS_DB_CONN_SET_UP = False
 
 
 class Entity(BaseModel):
@@ -159,14 +164,18 @@ class SQLAgent(ChatModel, Agent):
             input_text: str,
             return_sql: Optional[bool] = None
     ) -> str:
-        sql = self.generate_sql(input_text)
-        logger.info("generated sql:\n%s", sql)
         if return_sql is None:
             return_sql = self.return_sql
+        sql = self.generate_sql(input_text)
+        logger.info("generated sql:\n%s", sql)
         if return_sql:
             return sql
-        sql_result = self.read_from_sql(sql)
-        output_text = self.translate_result(input_text, sql, sql_result)
+        if not IS_DB_CONN_SET_UP:
+            logger.warn("No sql database connection is set up, returning raw sql query instead")
+            # return sql
+        df = self.read_from_sql(sql, is_dataframe=True)
+        output_text = df.to_markdown() + "\n"
+        output_text += self.translate_result(input_text, sql, df.to_dict(orient='records'))
         logger.debug(output_text)
         return output_text
 
@@ -177,4 +186,4 @@ if __name__ == '__main__':
     # print(agent.db.query('brand', 'Starbucks', n_results=5))
     # print(agent.db.query('mall', ['上海长泰广场', '上海长泰', '上海市长泰'], n_results=1))
     # print(agent.tokenize("海蓝之谜在上海市的面积最大的5个门店所在的商场名称和地址"))
-    print(agent.run("兴业太古汇里有多少家护肤化妆品的门店"))
+    agent.run("兴业太古汇和环贸iapm里有多少家化妆品的门店", return_sql=True)

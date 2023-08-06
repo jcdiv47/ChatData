@@ -12,3 +12,4 @@ colorama
 Pygments
 markdown
 markdown2
+tabulate

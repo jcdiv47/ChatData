@@ -4,6 +4,7 @@ import requests
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from chat.common.config import OPENAI_API_KEY
 from chat.common.const import OPENAI_MODEL
+from chat.common.helper_functions import coalesce
 
 
 class ChatModel:
@@ -13,7 +14,10 @@ class ChatModel:
             api_key: Optional[str] = None,
             model: Optional[str] = None,
     ):
-        self.api_key = api_key if api_key is not None else OPENAI_API_KEY
+        if OPENAI_API_KEY is None and api_key is None:
+            raise ValueError("Please either set up `OPENBAI_API_KEY` in environment variables"
+                             "or pass a valid key in `api_key`")
+        self.api_key = coalesce(api_key, OPENAI_API_KEY)
         self.model = model if model is not None else OPENAI_MODEL
         self._temperature = 0
         self._max_tokens = 2048
