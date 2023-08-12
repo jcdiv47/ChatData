@@ -137,7 +137,7 @@ def convert_to_markdown(text):
             line = re.sub(r"^(#)", r"\\\1", line)
             markdown_text += f"{line}  \n"
 
-    return markdown_text
+    return "\n" + markdown_text + "\n"
 
 
 def add_language_tag(text):

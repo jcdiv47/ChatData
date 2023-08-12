@@ -20,10 +20,10 @@ def predict(
         yield chatbot, history, "Empty context."
         return
     sql_agent = SQLAgent()
-    output_keys = sql_agent.run(text)
+    predictions = sql_agent.run(text)
     # for the purpose of stream output
-    for i in range(len(output_keys)):
-        x = output_keys[:i+1]
+    for i in range(len(predictions)):
+        x = predictions[i]
         a, b = [[y[0], convert_to_markdown(y[1])] for y in history] + [[text, convert_to_markdown(x)]], history + [[text, x]]
         yield a, b, "Generating..."
         time.sleep(0.03)
@@ -81,7 +81,7 @@ def build_demo():
         gr.Markdown(
             """
             <p align="center">
-                <img src="https://raw.githubusercontent.com/jcdiv47/ChatData/master/serve/assets/scishang-logo.png">
+                <img src="https://raw.githubusercontent.com/jcdiv47/ChatData/master/serve/assets/scishang-logo.png" width=500 height=300>
             </p>
             """)
         history = gr.State([])
@@ -170,4 +170,4 @@ def build_demo():
 
 if __name__ == '__main__':
     demo = build_demo()
-    demo.queue(concurrency_count=5, status_update_rate=10, api_open=False).launch(share=False)
+    demo.queue(concurrency_count=5, status_update_rate=10, api_open=False).launch(share=True)
